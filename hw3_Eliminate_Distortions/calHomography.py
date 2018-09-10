@@ -113,9 +113,10 @@ def cal_Homography_Affine_distortion(setofptsets):
 		M[i][0] = l[0] * m[0]
 		M[i][1] = l[0] * m[1] + l[1] * m[0]
 		b[i][0] = -l[2] * m[2]
-
+		print(M)
 
 	s = np.matmul(inv(M), b)
+	s = s / LA.norm(s)
 	S = np.array([ [s[0][0], s[1][0]], [s[1][0], 1.0] ], dtype = 'float')	
 	U, d, V = LA.svd(S)
 	d = np.sqrt(d)

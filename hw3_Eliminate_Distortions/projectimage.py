@@ -97,7 +97,7 @@ def correct_distorted_image(img, H):
 			#print(x, y, ptcx, ptcy)
 
 	print('boundary:', x0, x1, y0, y1)
-	ratio = 1e-5
+	ratio = 1e-3
 
 	bx0 = int(round( x0 * ratio ))
 	bx1 = int(round( x1 * ratio ))

@@ -74,13 +74,13 @@ for i in range(5):
 	b[i][0] = - l[2] * m[2]
 
 c = np.matmul(np.linalg.inv(M), b)
-#c = c / np.linalg.norm(c)
+c = c / np.linalg.norm(c)
 C = np.array([[c[0][0], c[1][0]/2, c[3][0]/2], [c[1][0]/2, c[2][0], c[4][0]/2], [c[3][0]/2, c[4][0]/2, 1.0]], dtype = 'float')
 
 
 U, d, V = np.linalg.svd(C) #H here is from correct to distorted
-#H = np.linalg.inv(U) # H here is from distorted to correct 
-H = U
+H = np.linalg.inv(U) # H here is from distorted to correct 
+#H = U
 
 H = H / H[2][2]
 print('H', H)
@@ -95,7 +95,7 @@ m = np.matmul(HnT, mp.reshape((3,1)))
 print(l, m)
 Cinf = np.array([ [1, 0, 0], [0, 1, 0], [0, 0, 0] ])
 tst = np.matmul(l.transpose(), np.matmul(Cinf, m)  )
-print(tst)
+print('tst', tst)
 
 
 
