@@ -33,7 +33,9 @@ pt06 = Point(544, 348)
 
 ptsets1 = [pt04, pt05, pt06]
 
-Ha = cal_Homography_Affine_distortion(ptsets0, ptsets1) #this Ha is from distorted to correct 
+setofptsets = [ptsets0, ptsets1]
+
+Ha = cal_Homography_Affine_distortion(setofptsets) #this Ha is from distorted to correct 
 
 img = cv2.imread('./HW3Pics/1.jpg')
 H = np.matmul(Ha, Hp)

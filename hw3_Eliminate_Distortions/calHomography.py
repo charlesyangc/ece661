@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from numpy.linalg import inv
+from numpy import linalg as LA
 
 class Point():
 	"""docstring for point"""
@@ -102,31 +103,25 @@ def cal_Homography_Projective_distortion(quad):
 
 	return H
 
-def cal_Homography_Affine_distortion(ptsets0, ptsets1):
-	l0 = np.cross(ptsets0[0].hp, ptsets0[1].hp)
-	l1 = np.cross(ptsets0[0].hp, ptsets0[2].hp)
-	#l0 = l0 / np.linalg.norm(l0)
-	#l1 = l1 / np.linalg.norm(l1)
+def cal_Homography_Affine_distortion(setofptsets):
 
-	l2 = np.cross(ptsets1[0].hp, ptsets1[1].hp)
-	l3 = np.cross(ptsets1[0].hp, ptsets1[2].hp)
-	#l2 = l2 / np.linalg.norm(l2)
-	#l3 = l3 / np.linalg.norm(l3)
+	M = np.zeros((2,2), dtype = 'float')
+	b = np.zeros((2,1), dtype = 'float')
+	for i in range(2):
+		l = np.cross(setofptsets[i][0].hp, setofptsets[i][1].hp)
+		m = np.cross(setofptsets[i][0].hp, setofptsets[i][2].hp)
+		M[i][0] = l[0] * m[0]
+		M[i][1] = l[0] * m[1] + l[1] * m[0]
+		b[i][0] = -l[2] * m[2]
 
-	M = np.zeros((2,2))
-	b = np.zeros((2,1))
-	M[0][0] = l0[0] * l1[0]
-	M[0][1] = l0[0] * l1[1] + l0[1] * l1[0]
-	b[0][0] = - l0[1] * l1[1]
-
-	M[1][0] = l2[0] * l3[0]
-	M[1][1] = l2[0] * l3[1] + l2[1] * l3[0]
-	b[1][0] = - l2[1] * l3[1]
 
 	s = np.matmul(inv(M), b)
-	S = np.array([ [s[0], s[1]], [s[1], 1.0] ], dtype = 'float')	
-	U, d, V = np.linalg.svd(S)
-	A = np.matmul(U, np.matmul( np.diag(np.sqrt(d)), V))
+	S = np.array([ [s[0][0], s[1][0]], [s[1][0], 1.0] ], dtype = 'float')	
+	U, d, V = LA.svd(S)
+	d = np.sqrt(d)
+	D = np.diag(d)
+	A = np.matmul(U, np.matmul(D, V))
+	A = A / LA.norm(A)
 
 	Ha = np.array([[A[0][0], A[0][1], 0], [A[1][0], A[1][1], 0], [0, 0, 1]], dtype = 'float')
 

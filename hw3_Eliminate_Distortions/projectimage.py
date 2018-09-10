@@ -73,7 +73,7 @@ def correct_distorted_image(img, H):
 
 	print(sizec)
 
-	init = np.matmul(H, [[100],[100],[1]])
+	init = np.matmul(H, [[size[0]/2],[size[1]/2],[1.0]])
 	x0 = init[0][0]
 	x1 = init[0][0]
 	y0 = init[1][0]
@@ -94,26 +94,17 @@ def correct_distorted_image(img, H):
 				y0 = ptcy-1
 			if ptcy > y1:
 				y1 = ptcy+1
-			if ptcx > 1000 or ptcy > 1000 or ptcx < -1000 or ptcy < -1000:
-				print('find box', x, y)
 			#print(x, y, ptcx, ptcy)
 
-	print(x0, x1, y0, y1)
-
-	ratio = 1
+	print('boundary:', x0, x1, y0, y1)
+	ratio = 1e-5
 
 	bx0 = int(round( x0 * ratio ))
 	bx1 = int(round( x1 * ratio ))
 	by0 = int(round( y0 * ratio ))
 	by1 = int(round( y1 * ratio ))
 
-	print(bx0, bx1, by0, by1)
-
 	imgc = np.zeros([bx1-bx0,by1-by0,3], np.uint8)
-
-	tst = np.matmul(H, [[405],[472],[1]])
-	tst = tst / tst[2][0]
-	print('tst1,', tst)
 
 	for x in range(0, size[0]):
 		for y in range(33, size[1]):

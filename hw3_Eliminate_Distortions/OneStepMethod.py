@@ -36,7 +36,7 @@ pt02 = Point(272, 245)
 ptsets0 = [pt00, pt01, pt02]
 
 pt10 = Point(268, 325)
-pt11 = Point(84, 316)
+pt11 = Point(84, 326)
 pt12 = Point(272, 244)
 ptsets1 = [pt10, pt11, pt12]
 
@@ -54,7 +54,6 @@ pt40 = Point(162, 405)
 pt41 = Point(167, 440)
 pt42 = Point(224, 405)
 ptsets4 = [pt40, pt41, pt42]
-
 
 
 setofsets = [ptsets0, ptsets1, ptsets2, ptsets3, ptsets4]
@@ -75,15 +74,30 @@ for i in range(5):
 	b[i][0] = - l[2] * m[2]
 
 c = np.matmul(np.linalg.inv(M), b)
-c = c / np.linalg.norm(c)
+#c = c / np.linalg.norm(c)
 C = np.array([[c[0][0], c[1][0]/2, c[3][0]/2], [c[1][0]/2, c[2][0], c[4][0]/2], [c[3][0]/2, c[4][0]/2, 1.0]], dtype = 'float')
 
 
 U, d, V = np.linalg.svd(C) #H here is from correct to distorted
-H = np.linalg.inv(U) # H here is from distorted to correct 
+#H = np.linalg.inv(U) # H here is from distorted to correct 
+H = U
 
 H = H / H[2][2]
-print(H)
+print('H', H)
+
+lp = np.cross(pt00.hp, pt01.hp)
+mp = np.cross(pt00.hp, pt02.hp)
+HnT = np.linalg.inv(np.transpose(H))
+print(lp, mp)
+l = np.matmul(HnT, lp.reshape((3,1)))
+m = np.matmul(HnT, mp.reshape((3,1)))
+
+print(l, m)
+Cinf = np.array([ [1, 0, 0], [0, 1, 0], [0, 0, 0] ])
+tst = np.matmul(l.transpose(), np.matmul(Cinf, m)  )
+print(tst)
+
+
 
 img = cv2.imread('./HW3Pics/2.jpg')
 imgc = correct_distorted_image(img, H)
