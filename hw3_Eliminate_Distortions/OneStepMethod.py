@@ -2,6 +2,7 @@ import numpy as np
 from calHomography import *
 import cv2
 from projectimage import *
+from numpy import linalg as LA
 
 #first find five sets of perpandicular lines:
 pt00 = Point(501, 1851)
@@ -55,7 +56,6 @@ pt41 = Point(167, 440)
 pt42 = Point(224, 405)
 ptsets4 = [pt40, pt41, pt42]
 
-
 setofsets = [ptsets0, ptsets1, ptsets2, ptsets3, ptsets4]
 
 M = np.zeros((5,5), dtype = 'float')
@@ -74,16 +74,18 @@ for i in range(5):
 	b[i][0] = - l[2] * m[2]
 
 c = np.matmul(np.linalg.inv(M), b)
-c = c / np.linalg.norm(c)
+#c = c / np.linalg.norm(c)
 C = np.array([[c[0][0], c[1][0]/2, c[3][0]/2], [c[1][0]/2, c[2][0], c[4][0]/2], [c[3][0]/2, c[4][0]/2, 1.0]], dtype = 'float')
 
 
 U, d, V = np.linalg.svd(C) #H here is from correct to distorted
-H = np.linalg.inv(U) # H here is from distorted to correct 
+H = LA.inv(U) # H here is from distorted to correct 
 #H = U
 
-H = H / H[2][2]
-print('H', H)
+print('d', d)
+
+conic = [[1, 0, 0], [0, 1, 0], [0, 0, 0]]
+
 
 lp = np.cross(pt00.hp, pt01.hp)
 mp = np.cross(pt00.hp, pt02.hp)
@@ -92,7 +94,7 @@ print(lp, mp)
 l = np.matmul(HnT, lp.reshape((3,1)))
 m = np.matmul(HnT, mp.reshape((3,1)))
 
-print(l, m)
+print(l.reshape(1,3), m.reshape(1,3))
 Cinf = np.array([ [1, 0, 0], [0, 1, 0], [0, 0, 0] ])
 tst = np.matmul(l.transpose(), np.matmul(Cinf, m)  )
 print('tst', tst)

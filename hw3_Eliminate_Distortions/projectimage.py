@@ -97,7 +97,7 @@ def correct_distorted_image(img, H):
 			#print(x, y, ptcx, ptcy)
 
 	print('boundary:', x0, x1, y0, y1)
-	ratio = 1e-3
+	ratio = 1
 
 	bx0 = int(round( x0 * ratio ))
 	bx1 = int(round( x1 * ratio ))
@@ -107,7 +107,7 @@ def correct_distorted_image(img, H):
 	imgc = np.zeros([bx1-bx0,by1-by0,3], np.uint8)
 
 	for x in range(0, size[0]):
-		for y in range(33, size[1]):
+		for y in range(0, size[1]):
 			pt = Point(x,y)
 			ptc = np.matmul(H, pt.hp.reshape((3,1)))
 			ptc = ptc / ptc[2][0] 
