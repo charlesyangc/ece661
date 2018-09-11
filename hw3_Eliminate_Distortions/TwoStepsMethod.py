@@ -60,7 +60,7 @@ Ha = cal_Homography_Affine_distortion(linesset) #this Ha is from distorted to co
 
 img = cv2.imread('./HW3Pics/1.jpg')
 H = np.matmul(Ha, Hp)
-imgf = correct_distorted_image_out2in(img, H)
+imgf = correct_distorted_image_out2in(img1, Ha)
 
 cv2.imwrite('121.jpg',imgf)
 cv2.destroyAllWindows()
