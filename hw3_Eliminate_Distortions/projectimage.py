@@ -36,7 +36,7 @@ def DoProject(img, imgp, quad, quadp):
 				img[x,y] = getRGB(ptp, imgp)
 
 
-def find_projected_boundary(quad, Hc):
+def find_quad_project_boundary(quad, Hc):
 	quadp = quad
 	for i in range(4):
 		pc = np.matmul(Hc, quad.A[i].hp.reshape((3,1))) 
@@ -45,10 +45,9 @@ def find_projected_boundary(quad, Hc):
 	x0, x1, y0, y1 = quadp.get_box()
 	box = box_2d(x0, x1, y0, y1)
 	box.get_int_coo_box()
-	print('box:', x0, x1, y0, y1, box.bd)
 	return box
 
-def correct_distorted_image(img, H):
+def find_img_project_boundary(img, H):
 	size = img.shape
 	# find the boundary of corrected picture
 	Pb = Point(0, 0)
@@ -62,17 +61,32 @@ def correct_distorted_image(img, H):
 	#Sb = Point(size[0]/2, 0)
 
 	quadb = Quad(Pb, Qb, Rb, Sb)
-	box = find_projected_boundary(quadb, H)
+	box = find_quad_project_boundary(quadb, H)
 
-	print(box.bd)
-	print(size[0], size[1])
+	return box
 
+def correct_distorted_image_4ptsDetBd(img, H):
+	box = find_img_project_boundary(img, H)
+	size = img.shape
 	#correct distortion:
-	sizec = [box.bd[1]-box.bd[0]+1, box.bd[3]-box.bd[2]+1, 3]
+	sizec = [box.bd[1]-box.bd[0]+2, box.bd[3]-box.bd[2]+2, 3]
 	imgc = np.zeros(sizec, np.uint8)
 
-	print(sizec)
+	for x in range(0, size[0]):
+		for y in range(0, size[1]):
+			pt = Point(x,y)
+			ptc = np.matmul(H, pt.hp.reshape((3,1)))
+			ptc = ptc / ptc[2][0] 
+			ptcx = int(round(ptc[0][0]))
+			ptcy = int(round(ptc[1][0]))
+			#print(x, y, ptcx, ptcy)
+			if (ptcx < box.bd[1]) and (ptcx > box.bd[0]) and (ptcy > box.bd[2]) and (ptcy < box.bd[3]):
+				imgc[ptcx-box.bd[0], ptcy-box.bd[2]] = getRGB(pt, img)
 
+	return imgc
+
+def correct_distorted_image(img, H):
+	size = img.shape
 	init = np.matmul(H, [[size[0]/2],[size[1]/2],[1.0]])
 	x0 = init[0][0]
 	x1 = init[0][0]
@@ -121,3 +135,39 @@ def correct_distorted_image(img, H):
 			#	imgc[ptcx-box.bd[0], ptcy-box.bd[2]] = getRGB(pt, img)
 	return imgc
 
+def correct_distorted_image_out2in(img, H):
+	box = find_img_project_boundary(img, H)
+	size = img.shape
+
+	print('in correct_distorted_image_out2in, size:, box: ', size, box.bd)
+
+	lenxc = box.bd[1] - box.bd[0] + 1
+	lenyc = box.bd[3] - box.bd[2] + 1
+
+	lenx = size[0] #output image
+	leny = size[0] * lenyc / lenxc #output image
+
+	print('in correct_distorted_image_out2in:, lenx, leny', lenx, leny)
+
+	xc0 = box.bd[0]
+	yc0 = box.bd[2]
+
+	#correct distortion:
+	sizec = [int(round(lenx+1)), int(round(leny+1)), 3]
+	imgc = np.zeros(sizec, np.uint8)
+
+	Hp = np.linalg.inv(H)
+
+	for x in range(0, int(round(lenx + 1))):
+		for y in range(0, int(round(leny + 1))):
+			xc = lenxc / lenx * x + xc0 
+			yc = lenyc / leny * y + yc0 
+			ptc = np.array([[xc], [yc], [1]], dtype = 'float')
+			pt = np.matmul(Hp, ptc)
+			pt = pt/pt[2][0]
+			ptx = int(round(pt[0][0]))
+			pty = int(round(pt[1][0]))
+			if ptx > 0 and ptx < size[0] and pty > 0 and pty < size[1] :
+				pt = Point(ptx, pty)
+				imgc[x, y] = getRGB(pt,img)
+	return imgc

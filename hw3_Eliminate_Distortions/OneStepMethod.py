@@ -4,6 +4,42 @@ import cv2
 from projectimage import *
 from numpy import linalg as LA
 
+def Cal_Homography_One_Step(setofsets):
+	M = np.zeros((5,5), dtype = 'float')
+	b = np.zeros((5,1), dtype = 'float')
+
+	for i in range(5):
+		l = np.cross( setofsets[i][0].hp, setofsets[i][1].hp)
+		l = l / np.linalg.norm(l)
+		m = np.cross( setofsets[i][0].hp, setofsets[i][2].hp) 
+		m = m / np.linalg.norm(m)
+		M[i][0] = l[0] * m[0]
+		M[i][1] = (l[0] * m[1] + l[1] * m[0]) / 2 
+		M[i][2] = l[1] * m[1]
+		M[i][3] = (l[0] * m[2] + l[2] * m[0]) / 2
+		M[i][4] = (l[1] * m[2] + l[2] * m[1]) / 2
+		b[i][0] = - l[2] * m[2]
+
+	c = np.matmul(np.linalg.inv(M), b)
+	C = np.array([[c[0][0], c[1][0]/2, c[3][0]/2], 
+				  [c[1][0]/2, c[2][0], c[4][0]/2], 
+				  [c[3][0]/2, c[4][0]/2, 1]], dtype = 'float')
+
+	# U, d, V = np.linalg.svd(C) #H here is from correct to distorted
+	# H = LA.inv(U) # H here is from distorted to correct 
+
+	S = np.array([[C[0][0], C[0][1]], [C[1][0], C[1][1]]], dtype = 'float')
+	U, d, V = LA.svd(S)
+	D = np.diag(np.sqrt(d))
+	A = np.matmul(U, np.matmul(D, V))
+	t = np.array([ C[2][0], C[2][1] ], dtype = 'float')
+	v = np.matmul(t, LA.inv(A))
+	H = np.array( [[A[0][0], A[0][1], 0], 
+				   [A[1][0], A[1][1], 0], 
+				   [v[0],    v[1],    1]], dtype = 'float' )
+	H = LA.inv(H)
+	return H
+
 #first find five sets of perpandicular lines:
 pt00 = Point(501, 1851)
 pt01 = Point(405, 2031)
@@ -58,50 +94,9 @@ ptsets4 = [pt40, pt41, pt42]
 
 setofsets = [ptsets0, ptsets1, ptsets2, ptsets3, ptsets4]
 
-M = np.zeros((5,5), dtype = 'float')
-b = np.zeros((5,1), dtype = 'float')
 
-for i in range(5):
-	l = np.cross( setofsets[i][0].hp, setofsets[i][1].hp)
-	l = l / np.linalg.norm(l)
-	m = np.cross( setofsets[i][0].hp, setofsets[i][2].hp) 
-	m = m / np.linalg.norm(m)
-	M[i][0] = l[0] * m[0]
-	M[i][1] = (l[0] * m[1] + l[1] * m[0]) / 2 
-	M[i][2] = l[1] * m[1]
-	M[i][3] = (l[0] * m[2] + l[2] * m[0]) / 2
-	M[i][4] = (l[1] * m[2] + l[2] * m[1]) / 2
-	b[i][0] = - l[2] * m[2]
-
-c = np.matmul(np.linalg.inv(M), b)
-#c = c / np.linalg.norm(c)
-C = np.array([[c[0][0], c[1][0]/2, c[3][0]/2], [c[1][0]/2, c[2][0], c[4][0]/2], [c[3][0]/2, c[4][0]/2, 1.0]], dtype = 'float')
-
-
-U, d, V = np.linalg.svd(C) #H here is from correct to distorted
-H = LA.inv(U) # H here is from distorted to correct 
-#H = U
-
-print('d', d)
-
-conic = [[1, 0, 0], [0, 1, 0], [0, 0, 0]]
-
-
-lp = np.cross(pt00.hp, pt01.hp)
-mp = np.cross(pt00.hp, pt02.hp)
-HnT = np.linalg.inv(np.transpose(H))
-print(lp, mp)
-l = np.matmul(HnT, lp.reshape((3,1)))
-m = np.matmul(HnT, mp.reshape((3,1)))
-
-print(l.reshape(1,3), m.reshape(1,3))
-Cinf = np.array([ [1, 0, 0], [0, 1, 0], [0, 0, 0] ])
-tst = np.matmul(l.transpose(), np.matmul(Cinf, m)  )
-print('tst', tst)
-
-
-
+H = Cal_Homography_One_Step(setofsets)
 img = cv2.imread('./HW3Pics/2.jpg')
-imgc = correct_distorted_image(img, H)
+imgc = correct_distorted_image_out2in(img, H)
 cv2.imwrite('21.jpg',imgc)
 cv2.destroyAllWindows()

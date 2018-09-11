@@ -24,48 +24,11 @@ quadc = Quad(Pc, Qc, Rc, Sc)
 def P2PCorr(quad, quadc, img):
 	# Calculate the Homography
 	Hc = cal_Homography(quadc, quad) # Calculate the Homography of quad to quadc
-	
-	size = img.shape
-
-
-	# find the boundary of corrected picture
-	Pb = Point(0, 0)
-	Qb = Point(0, size[1])
-	Rb = Point(size[0], 0)
-	Sb = Point(size[0], size[1])
-
-	#Pb2 = Point(0, size[1]/2)
-	#Qb2 = Point(size[0]/2, size[1])
-	#Rb2 = Point(size[0], size[1]/2)
-	#Sb2 = Point(size[0]/2, 0)
-
-	quadb = Quad(Pb, Qb, Rb, Sb)
-	box = find_projected_boundary(quadb, Hc)
-
-	#quadb2 = Quad(Pb2, Qb2, Rb2, Sb2)
-	#box2 = find_projected_boundary(quadb2, Hc)
-
-	#box.bd[0] = min(box.bd[0], box2.bd[0])
-	#box.bd[1] = max(box.bd[1], box2.bd[1])
-	#box.bd[2] = min(box.bd[2], box2.bd[2])
-	#box.bd[3] = max(box.bd[3], box2.bd[3])
-
-	#correct distortion:
-	sizec = [box.bd[1]-box.bd[0]+2, box.bd[3]-box.bd[2]+2, 3]
-	imgc = np.zeros(sizec, np.uint8)
-
-	for x in range(0, size[0]):
-		for y in range(0, size[1]):
-			pt = Point(x,y)
-			ptc = np.matmul(Hc, pt.hp.reshape((3,1)))
-			ptc = ptc / ptc[2][0] 
-			ptcx = int(round(ptc[0][0]))
-			ptcy = int(round(ptc[1][0]))
-			#print(x, y, ptcx, ptcy)
-			if (ptcx < box.bd[1]) and (ptcx > box.bd[0]) and (ptcy > box.bd[2]) and (ptcy < box.bd[3]):
-				imgc[ptcx-box.bd[0], ptcy-box.bd[2]] = getRGB(pt, img)
-
+	#imgc = correct_distorted_image_4ptsDetBd(img, Hc)
+	imgc = correct_distorted_image_out2in(img, Hc)
 	return imgc
+
+
 
 img = cv2.imread('./HW3Pics/2.jpg')
 imgc = P2PCorr(quad2, quadc, img)
