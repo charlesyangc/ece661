@@ -32,6 +32,17 @@ class Quad():
 				y1 = self.A[i].y
 		return x0, x1, y0, y1
 
+class PerpendicularLines():
+	"""docstring for PerpendicularLines"""
+	"""A,B is perpendicular to C, D """
+	def __init__(self, A, B, C, D):
+		self.pt = [A, B, C, D]
+		self.l = np.cross(A.hp, B.hp)
+		self.l = self.l / LA.norm(self.l)
+		self.m = np.cross(C.hp, D.hp)
+		self.m = self.m / LA.norm(self.m)
+		
+
 class box_2d():
 	"""docstring for box"""
 	def __init__(self, x0, x1, y0, y1):
@@ -103,15 +114,13 @@ def cal_Homography_Projective_distortion(quad):
 
 	return H
 
-def cal_Homography_Affine_distortion(setofptsets):
+def cal_Homography_Affine_distortion(linesset):
 
 	M = np.zeros((2,2), dtype = 'float')
 	b = np.zeros((2,1), dtype = 'float')
 	for i in range(2):
-		l = np.cross(setofptsets[i][0].hp, setofptsets[i][1].hp)
-		l = l / LA.norm(l)
-		m = np.cross(setofptsets[i][0].hp, setofptsets[i][2].hp)
-		m = m / LA.norm(m)
+		l = linesset[i].l
+		m = linesset[i].m
 		M[i][0] = l[0] * m[0]
 		M[i][1] = l[0] * m[1] + l[1] * m[0]
 		b[i][0] = -l[2] * m[2]

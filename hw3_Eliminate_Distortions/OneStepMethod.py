@@ -94,7 +94,6 @@ ptsets4 = [pt40, pt41, pt42]
 
 setofsets = [ptsets0, ptsets1, ptsets2, ptsets3, ptsets4]
 
-
 H = Cal_Homography_One_Step(setofsets)
 img = cv2.imread('./HW3Pics/2.jpg')
 imgc = correct_distorted_image_out2in(img, H)

@@ -152,6 +152,8 @@ def correct_distorted_image_out2in(img, H):
 	xc0 = box.bd[0]
 	yc0 = box.bd[2]
 
+	print('in correct_distorted_image_out2in:, xc0, yc0', xc0, yc0)
+
 	#correct distortion:
 	sizec = [int(round(lenx+1)), int(round(leny+1)), 3]
 	imgc = np.zeros(sizec, np.uint8)
@@ -162,7 +164,7 @@ def correct_distorted_image_out2in(img, H):
 		for y in range(0, int(round(leny + 1))):
 			xc = lenxc / lenx * x + xc0 
 			yc = lenyc / leny * y + yc0 
-			ptc = np.array([[xc], [yc], [1]], dtype = 'float')
+			ptc = np.array([[xc], [yc], [1.0]], dtype = 'float')
 			pt = np.matmul(Hp, ptc)
 			pt = pt/pt[2][0]
 			ptx = int(round(pt[0][0]))
