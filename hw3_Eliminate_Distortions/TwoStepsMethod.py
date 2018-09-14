@@ -20,6 +20,7 @@ quad = Quad(P, Q, R, S)
 # quad = Quad(P, Q, R, S)
 
 Hp = cal_Homography_Projective_distortion(quad)
+print(Hp)
 img = cv2.imread('./HW3Pics/1.jpg')
 img1 = correct_distorted_image_out2in(img, Hp)
 cv2.imwrite('120.jpg',img1)
@@ -43,24 +44,35 @@ pt06 = Point(44, 156)
 
 # for figure 1
 A = Point(756, 582)
-B = Point(1020, 528)
-C = Point(1344, 228)
-D = Point(282, 936)
+B = Point(1071, 492)
+C = Point(198, 963)
+D = Point(1263, 252)
 lines1 = PerpendicularLines(A, B, C, D)
-A2 = Point(303, 879)
-B2 = Point(615, 795)
-C2 = Point(516, 876)
+A2 = Point(1149, 324)
+B2 = Point(1464, 237)
+C2 = Point(513, 870)
 D2 = Point(1575, 165)
 lines2 = PerpendicularLines(A2, B2, C2, D2)
 
+# A = Point(1365, 228)
+# B = Point(621, 2046)
+# C = Point(591, 1155)
+# D = Point(1737, 1056)
+# lines1 = PerpendicularLines(A, B, C, D)
+# A2 = Point(1827, 135)
+# B2 = Point(1611, 2094)
+# C2 = Point(1131, 498)
+# D2 = Point(1800, 384)
+# lines2 = PerpendicularLines(A2, B2, C2, D2)
 
 linesset = [lines1, lines2]
 
 Ha = cal_Homography_Affine_distortion(linesset) #this Ha is from distorted to correct 
 
 img = cv2.imread('./HW3Pics/1.jpg')
+print(Ha)
 H = np.matmul(Ha, Hp)
-imgf = correct_distorted_image_out2in(img1, Ha)
+imgf = correct_distorted_image_out2in(img1, H)
 
 cv2.imwrite('121.jpg',imgf)
 cv2.destroyAllWindows()

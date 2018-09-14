@@ -135,14 +135,14 @@ def correct_distorted_image(img, H):
 			#	imgc[ptcx-box.bd[0], ptcy-box.bd[2]] = getRGB(pt, img)
 	return imgc
 
-def correct_distorted_image_out2in(img, H):
+def correct_distorted_image_out2in(img, H, Hinv):
 	box = find_img_project_boundary(img, H)
 	size = img.shape
 
 	print('in correct_distorted_image_out2in, size:, box: ', size, box.bd)
 
-	lenxc = box.bd[1] - box.bd[0] + 1
-	lenyc = box.bd[3] - box.bd[2] + 1
+	lenxc = box.bd[1] - box.bd[0] + 1 #intermediate image
+	lenyc = box.bd[3] - box.bd[2] + 1 #intermediate image
 
 	lenx = size[0] #output image
 	leny = size[0] * lenyc / lenxc #output image

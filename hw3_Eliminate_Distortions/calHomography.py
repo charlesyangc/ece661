@@ -131,10 +131,8 @@ def cal_Homography_Affine_distortion(linesset):
 	d = np.sqrt(d)
 	D = np.diag(d)
 	A = np.matmul(U, np.matmul(D, V))
-	print(A)
-	print(S)
 	Ha = np.array([[A[0][0], A[0][1], 0], [A[1][0], A[1][1], 0], [0, 0, 1]], dtype = 'float')
-	Ha = Ha / np.amax(Ha)
+	#Ha = Ha / np.amax(Ha)
 	Ha = inv(Ha)
 
 	return(Ha)
