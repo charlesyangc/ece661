@@ -24,91 +24,92 @@ def Cal_Homography_One_Step(perpen_lines_set):
 				  [c[1][0]/2, c[2][0],   c[4][0]/2], 
 				  [c[3][0]/2, c[4][0]/2, 1.0]], dtype = 'float')
 
+	C = C / np.amax(C)
 	# U, d, V = np.linalg.svd(C) #H here is from undistorted to distorted
 	# Hinv = U
-	# #U = U / np.sqrt(d[0])
 	# H = LA.inv(U) # H here is from distorted to undistorted 
 
 	S = np.array([[C[0][0], C[0][1]], [C[1][0], C[1][1]]], dtype = 'float')
 	U, d, V = LA.svd(S)
+	print('U', U)
+	print('V,', V)
 	D = np.diag(np.sqrt(d))
-	A = np.matmul(U, np.matmul(D, V))
+	Vt = V.transpose()
+	A = np.matmul(Vt, np.matmul(D, V))
 	t = np.array([ C[2][0], C[2][1] ], dtype = 'float')
 	Ainv = LA.inv(A)
 	v = np.matmul(t, Ainv.transpose())
 	H = np.array( [[A[0][0], A[0][1], 0], 
 				   [A[1][0], A[1][1], 0], 
 				   [v[0],    v[1],    1]], dtype = 'float' )
-	H = H
-	Hinv = LA.inv(H)
+	Hinv = H
+	H = LA.inv(H)
 	return H, Hinv
 
-#first find five sets of perpandicular lines:
-A = Point(1245, 246)
-B = Point(1356, 231)
-C = Point(1356, 231)
-D = Point(1230, 294)
-lines0 = PerpendicularLines(A, B, C, D)
+#five sets of perpandicular lines for Pic. 1:
+A = Point(1681,594)
+B = Point(1670,670)
+C = Point(1775,656)
+D = Point(1784,579)
 
-A1 = Point(1212, 342)
-B1 = Point(1182, 393)
-C1 = Point(1182, 393)
-D1 = Point(1299, 369)
-lines1 = PerpendicularLines(A1, B1, C1, D1)
+lines0 = PerpendicularLines(A,B,B,C)
+lines1 = PerpendicularLines(B,C,C,D)
+lines2 = PerpendicularLines(A,C,B,D)
+lines3 = PerpendicularLines(C,D,D,A)
+lines4 = PerpendicularLines(D,A,A,B)
 
-A2 = Point(1524, 234)
-B2 = Point(1629, 213)
-C2 = Point(1629, 213)
-D2 = Point(1638, 171)
-lines2 = PerpendicularLines(A2, B2, C2, D2)
+#five sets of perpandicular lines for Pic. 2:
+# A = Point(71,245)
+# B = Point(82,326)
+# C = Point(265,323)
+# D = Point(269,244)
 
-A3 = Point(1503, 285)
-B3 = Point(1623, 258)
-C3 = Point(1623, 258)
-D3 = Point(1614, 312)
-lines3 = PerpendicularLines(A3, B3, C3, D3)
+# lines0 = PerpendicularLines(A, B, B, C)
+# lines1 = PerpendicularLines(B,C,C,D)
+# lines2 = PerpendicularLines(C,D,D,A)
+# #left
+# A1 = Point(161,404)
+# B1 = Point(163,436)
+# C1 = Point(223,437)
+# D1 = Point(223,404)
+# lines3 = PerpendicularLines(A1, C1, B1, D1)
 
-A4 = Point(1113, 828)
-B4 = Point(1083, 918)
-C4 = Point(1083, 918)
-D4 = Point(1215, 903)
-lines4 = PerpendicularLines(A4, B4, C4, D4)
+# A1 = Point(135,58)
+# B1 = Point(139,126)
+# C1 = Point(230,126)
+# D1 = Point(231,59)
+# lines4 = PerpendicularLines(A1, C1, B1, D1)
 
-#find five sets of perpanducular lines for pic 2
-# A = Point(75, 247)
-# B = Point(84, 326)
-# C = Point(75, 247)
-# D = Point(272, 245)
-# lines0 = PerpendicularLines(A, B, C, D)
+#five sets of perpandicular lines for pic. 8
+A = Point(1894, 1408)
+B = Point(1767, 1844)
+C = Point(2366, 1607)
+D = Point(2192, 2058)
 
-# A1 = Point(268, 325)
-# B1 = Point(84, 326)
-# C1 = Point(268, 325)
-# D1 = Point(272, 244)
-# lines1 = PerpendicularLines(A1, B1, C1, D1)
+lines0 = PerpendicularLines(A,B,B,D)
+lines1 = PerpendicularLines(B,D,D,C)
+lines2 = PerpendicularLines(A,D,B,C)
+lines3 = PerpendicularLines(D,C,C,A)
+lines4 = PerpendicularLines(C,A,A,B)
 
-# A2 = Point(137, 58)
-# B2 = Point(141, 128)
-# C2 = Point(137, 58)
-# D2 = Point(234, 57)
-# lines2 = PerpendicularLines(A2, B2, C2, D2)
+# for PIC 15
+A = Point(249, 363)
+B = Point(245, 384)
+C = Point(288, 363)
+D = Point(281, 384)
 
-# A3 = Point(232, 126)
-# B3 = Point(141, 128)
-# C3 = Point(232, 126)
-# D3 = Point(234, 57)
-# lines3 = PerpendicularLines(A3, B3, C3, D3)
+lines0 = PerpendicularLines(A,B,B,D)
+lines1 = PerpendicularLines(B,D,D,C)
+lines2 = PerpendicularLines(A,D,B,C)
+lines3 = PerpendicularLines(D,C,C,A)
+lines4 = PerpendicularLines(C,A,A,B)
 
-# A4 = Point(162, 405)
-# B4 = Point(167, 440)
-# C4 = Point(162, 405)
-# D4 = Point(224, 405)
-# lines4 = PerpendicularLines(A4, B4, C4, D4)
 
 linesset = [lines0, lines1, lines2, lines3, lines4]
 
 H, Hinv = Cal_Homography_One_Step(linesset)
-img = cv2.imread('./HW3Pics/1.jpg')
-imgc = correct_distorted_image_out2in(img, H, Hinv)
-cv2.imwrite('11.jpg',imgc)
+print('H', H)
+img = cv2.imread('./HW3Pics/15.jpg')
+imgc = correct_distorted_image_out2in(img, H)
+cv2.imwrite('151s.jpg',imgc)
 cv2.destroyAllWindows()

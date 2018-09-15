@@ -135,7 +135,7 @@ def correct_distorted_image(img, H):
 			#	imgc[ptcx-box.bd[0], ptcy-box.bd[2]] = getRGB(pt, img)
 	return imgc
 
-def correct_distorted_image_out2in(img, H, Hinv):
+def correct_distorted_image_out2in(img, H):
 	box = find_img_project_boundary(img, H)
 	size = img.shape
 
