@@ -33,8 +33,11 @@ def harris_corner_detector(img, sigma, threshold):
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 	#convolve the img with haar_filter
-	Gx = scipy.ndimage.correlate(gray, hx, mode='nearest')
-	Gy = scipy.ndimage.correlate(gray, hy, mode='nearest')
+	Gx = scipy.ndimage.convolve(gray, hx, mode='nearest')
+	Gy = scipy.ndimage.convolve(gray, hy, mode='nearest')
+
+	Gx = (Gx - np.amin(Gx)) / (np.amax(Gx) - np.amin(Gx))
+	Gy = (Gy - np.amin(Gy)) / (np.amax(Gy) - np.amin(Gy))
 
 	#compute the squares and products of the gradients at each pixel:
 	Gx2 = Gx ** 2
@@ -42,21 +45,21 @@ def harris_corner_detector(img, sigma, threshold):
 	Gxy = Gx * Gy
 
 	#define window:
-	len_window = int(round(5*sigma))
-	if (len_window % 2 == 0):
-		len_window += 1
+	len_conv_window = int(round(5*sigma))
+	if (len_conv_window % 2 == 0):
+		len_conv_window += 1
 
 	#compute Ratio of DET to Trace:
-	half_len_window = (len_window - 1) // 2
+	halflen_conv_window = (lenconv_window - 1) // 2
 	R = np.zeros(np.shape(gray))
 	lenx, leny = np.shape(gray)
 	C = np.zeros((2,2))
-	for i in range(half_len_window, lenx - half_len_window + 1):
-		for j in range(half_len_window, leny - half_len_window + 1):
-			C[0][0] = np.sum(get_square_window(Gx2, half_len_window, [i, j]))
-			C[0][1] = np.sum(get_square_window(Gxy, half_len_window, [i, j]))
+	for i in range(halflen_conv_window, lenx - halflen_conv_window + 1):
+		for j in range(halflen_conv_window, leny - halflen_conv_window + 1):
+			C[0][0] = np.sum(get_square_window(Gx2, halflen_conv_window, [i, j]))
+			C[0][1] = np.sum(get_square_window(Gxy, halflen_conv_window, [i, j]))
 			C[1][0] = C[0][1]
-			C[1][1] = np.sum(get_square_window(Gy2, half_len_window, [i, j]))
+			C[1][1] = np.sum(get_square_window(Gy2, halflen_conv_window, [i, j]))
 			if (np.trace(C) != 0):
 				R[i][j] = np.linalg.det(C) / (np.trace(C) * np.trace(C) )
 			else:
@@ -71,10 +74,14 @@ def harris_corner_detector(img, sigma, threshold):
 	halflen_local_maxima = (len_local_maxima - 1) // 2
 	for i in range(halflen_local_maxima, lenx - halflen_local_maxima + 1):
 		for j in range(halflen_local_maxima, leny - halflen_local_maxima + 1):
-			local_maxima = np.amax(R[i - halflen_local_maxima, i + halflen_local_maxima + 1])
+			local = get_square_window(R, halflen_local_maxima, [i, j])
+			print('local is ', local)
+			local_maxima = np.amax(local)
 			if ( (R[i][j] == local_maxima) and (R[i][j] > 0 ) and ( abs(R[i][j]) > abs(R_mean) ) and (abs(R[i][j]) > threshold) ):
 				C[i][j] = 1 
 				list_Corner.append([i, j])
+
+	print('in harris_corner_detector, lenth of list_Corner is ', len(list_Corner))
 
 	return list_Corner
 
@@ -122,3 +129,13 @@ def output_two_imgs_with_corr_points(img0, img1, corr_points):
 		cv2.line(img_o, corr_points[i][0], rightpoint, (255, 0, 0), 3)
 	return img_o
 
+def use_sift(img):
+	 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+	 sift = cv2.xfeatures2d.SIFT_create(150)
+	 kp, des = sift.detectAndCompute(gray, None)
+	 return kp, des
+
+def use_surf(img):
+	gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+	surf = cv2.SURF(400)
+	kp, des = surf.detectAndCompute(img, None)

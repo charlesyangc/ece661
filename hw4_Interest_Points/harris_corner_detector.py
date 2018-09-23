@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 from find_interest_points import *
 
 
@@ -9,14 +10,9 @@ gray0 = cv2.cvtColor(img0, cv2.COLOR_BGR2GRAY)
 gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
 
 sigma = math.sqrt(2)
-corner_threshold = 4e-2
+corner_threshold = 0.04
 list_Corner0 = harris_corner_detector(img0, sigma, corner_threshold)
 list_Corner1 = harris_corner_detector(img1, sigma, corner_threshold)
-
-print('in harris_corner_detector')
-print(list_Corner0)
-print(len(list_Corner0))
-print(len(list_Corner1))
 
 ncc_threshold= 0.95
 list_ssd, list_ncc = find_correspondent_points(gray0, gray1, list_Corner0, list_Corner1, ncc_threshold)	
