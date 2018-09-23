@@ -137,5 +137,6 @@ def use_sift(img):
 
 def use_surf(img):
 	gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-	surf = cv2.SURF(400)
+	surf = cv2.xfeatures2d.SURF_create(1000)
 	kp, des = surf.detectAndCompute(img, None)
+	return kp, des
