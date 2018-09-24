@@ -36,8 +36,12 @@ def harris_corner_detector(img, sigma, threshold):
 	Gx = scipy.ndimage.convolve(gray, hx, mode='nearest')
 	Gy = scipy.ndimage.convolve(gray, hy, mode='nearest')
 
-	Gx = (Gx - np.amin(Gx)) / (np.amax(Gx) - np.amin(Gx))
-	Gy = (Gy - np.amin(Gy)) / (np.amax(Gy) - np.amin(Gy))
+	minGx = np.amin(Gx)
+	maxGx = np.amax(Gx)
+	Gx = (Gx - minGx) / (maxGx - minGx)
+	minGy = np.amin(Gy)
+	maxGy = np.amax(Gy)
+	Gy = (Gy - minGy) / (maxGy - minGy)
 
 	#compute the squares and products of the gradients at each pixel:
 	Gx2 = Gx ** 2
@@ -50,7 +54,7 @@ def harris_corner_detector(img, sigma, threshold):
 		len_conv_window += 1
 
 	#compute Ratio of DET to Trace:
-	halflen_conv_window = (lenconv_window - 1) // 2
+	halflen_conv_window = (len_conv_window - 1) // 2
 	R = np.zeros(np.shape(gray))
 	lenx, leny = np.shape(gray)
 	C = np.zeros((2,2))
@@ -75,13 +79,10 @@ def harris_corner_detector(img, sigma, threshold):
 	for i in range(halflen_local_maxima, lenx - halflen_local_maxima + 1):
 		for j in range(halflen_local_maxima, leny - halflen_local_maxima + 1):
 			local = get_square_window(R, halflen_local_maxima, [i, j])
-			print('local is ', local)
 			local_maxima = np.amax(local)
 			if ( (R[i][j] == local_maxima) and (R[i][j] > 0 ) and ( abs(R[i][j]) > abs(R_mean) ) and (abs(R[i][j]) > threshold) ):
 				C[i][j] = 1 
 				list_Corner.append([i, j])
-
-	print('in harris_corner_detector, lenth of list_Corner is ', len(list_Corner))
 
 	return list_Corner
 
@@ -95,9 +96,6 @@ def find_correspondent_points(gray0, gray1, list_Corner0, list_Corner1, ncc_thre
 	len_corr_window = 21
 	halflen_corr_window = (len_corr_window - 1) // 2
 
-	print('corner0', len(list_Corner0))
-	print('corner1', len(list_Corner1))
-
 	for i in range(len(list_Corner0)):
 		for j in range(len(list_Corner1)):
 			coo0 = list_Corner0[i]
@@ -107,31 +105,35 @@ def find_correspondent_points(gray0, gray1, list_Corner0, list_Corner1, ncc_thre
 			ssd = np.sum( (f0 - f1)**2 )
 			list_ssd_cand.append([coo0, coo1, ssd])
 
-			mean0 = f0 / np.sum(f0)
-			mean1 = f1 / np.sum(f1)
-			ncc = np.sum( (f0 - mean0) * (f1 - mean1) ) / math.sqrt( (f0 - mean0)**2 * (f1 - mean1)**2 )
+			mean0 = np.sum(f0) / np.size(f0)
+			mean1 = np.sum(f1) / np.size(f1)
+			ncc = np.sum( (f0 - mean0) * (f1 - mean1) ) / math.sqrt( np.sum((f0 - mean0)**2) * np.sum((f1 - mean1)**2) )
 			if (ncc > ncc_threshold):
 				list_ncc.append([coo0, coo1])
 
 	ssdmin = min(list_ssd_cand, key = get_last_element)
 
 	for i in range(len(list_ssd_cand)):
-		if (list_ssd_cand[i][2] < 10 * ssdmin):
-			list_ssd.append(list_ssd_cand[:2])
+		if (list_ssd_cand[i][2] < 2 * ssdmin[2]):
+			list_ssd.append([list_ssd_cand[i][0], list_ssd_cand[i][1]])
 
 	return list_ssd, list_ncc
 
 def output_two_imgs_with_corr_points(img0, img1, corr_points):
-	lenx0, leny0 = np.shape(img0)
+	size = np.shape(img0)
+	lenx0 = size[0]
+	leny0 = size[1]
 	img_o = np.concatenate((img0, img1), axis = 1)
 	for i in range(len(corr_points)):
-		rightpoint = [corr_points[i][1][0], corr_points[i][1][1] + leny0]
-		cv2.line(img_o, corr_points[i][0], rightpoint, (255, 0, 0), 3)
+		leftpoint = (corr_points[i][0][1], corr_points[i][0][0])
+		rightpoint = (corr_points[i][1][1] + leny0, corr_points[i][1][0])
+		cv2.line(img_o, leftpoint, rightpoint, (255, 0, 0), 1)
+
 	return img_o
 
 def use_sift(img):
 	 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-	 sift = cv2.xfeatures2d.SIFT_create(150)
+	 sift = cv2.xfeatures2d.SIFT_create(10000)
 	 kp, des = sift.detectAndCompute(gray, None)
 	 return kp, des
 
